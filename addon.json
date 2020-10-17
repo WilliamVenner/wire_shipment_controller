@@ -1,0 +1,6 @@
+{
+	"title" : "Wiremod Shipment Controller",
+	"type"  : "tool",
+	"tags"  : ["roleplay", "build"],
+	"ignore": ["addon.jpg", ".git/*", "LICENSE", "README.md"]
+}
