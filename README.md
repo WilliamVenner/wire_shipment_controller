@@ -5,7 +5,7 @@
 
 # Wiremod Shipment Controller
 
-The Wiremod Shipment Controller is a simple Wiremod component that creates an interface of crucial inputs and outputs for use with DarkRP shipments, allowing you to make extremely advanced automatic gun shops without the need for E2 or Users, both of which may be restricted or blocked completely on some servers.
+The Wiremod Shipment Controller is a simple [Wiremod](https://wiremod.com/) component that creates an interface of crucial inputs and outputs for use with DarkRP shipments, allowing you to make extremely advanced automatic gun shops without the need for E2 or Users, both of which may be restricted or blocked completely on some servers.
 
 ## Recommended Extras
 
