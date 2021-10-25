@@ -41,6 +41,10 @@ if CLIENT then
 	language.Add("tool.wire_shipment_controller.inputs", "Inputs")
 	language.Add("tool.wire_shipment_controller.outputs", "Outputs")
 	language.Add("tool.wire_shipment_controller.inputs.dispense", "[BOOLEAN 1/0] Dispenses 1 item from the shipment")
+	language.Add("tool.wire_shipment_controller.inputs.pricemarkup", "[NUMBER] Adds extra money to the price output")
+	language.Add("tool.wire_shipment_controller.inputs.seperatepricemarkup", "[NUMBER] Adds extra money to the seperate price output")
+	language.Add("tool.wire_shipment_controller.inputs.currency", "[STRING] Set the currency symbol")
+	language.Add("tool.wire_shipment_controller.inputs.outofstockmessage", "[STRING] The message to output when no shipment is detected")
 	language.Add("tool.wire_shipment_controller.outputs.quantity", "[NUMBER] Amount of items left in the shipment")
 	language.Add("tool.wire_shipment_controller.outputs.size", "[NUMBER] Amount of items the shipment originally held")
 	language.Add("tool.wire_shipment_controller.outputs.price", "[NUMBER] Price of shipment")
@@ -49,7 +53,9 @@ if CLIENT then
 	language.Add("tool.wire_shipment_controller.outputs.type", "[STRING] Class name of shipment item entity")
 	language.Add("tool.wire_shipment_controller.outputs.model", "[STRING] Model path of item")
 	language.Add("tool.wire_shipment_controller.outputs.separate", "[BOOLEAN 1/0] Whether the shipment is also sold separately")
-	language.Add("tool.wire_shipment_controller.outputs.separateprice", "[NUMBER] Price of item when sold separately")
+	language.Add("tool.wire_shipment_controller.outputs.separateprice", "[NUMBER] Price of item when sold separately, if not seperate the output will default to price / size")
+	language.Add("tool.wire_shipment_controller.outputs.nameandprice", "[STRING] Combination of name and price")
+	language.Add("tool.wire_shipment_controller.outputs.nameandprice", "[NUMBER] Combination of name and seperate price")
 	language.Add("tool.wire_shipment_controller.outputs.shipment", "[ENTITY] The shipment itself")
 
 	TOOL.Information = { { name = "left", text = "Create/Update " .. TOOL.Name } }
@@ -65,8 +71,8 @@ TOOL.ClientConVar = {
 if SERVER then
 	function TOOL:GetConVars() return self:GetClientNumber("range") end
 else
-	local inputs = { "Dispense" }
-	local outputs = { "Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Shipment" }
+	local inputs = { "Dispense", "Price Markup", "Seperate Price Markup", "Currency", "Out Of Stock Message" }
+	local outputs = { "Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Seperate Price", "Shipment" }
 
 	function TOOL.BuildCPanel(CPanel)
 		local link = CPanel:Help("https://github.com/WilliamVenner/wire_shipment_controller")
