@@ -51,11 +51,15 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	
-	self.Inputs = WireLib.CreateInputs(self, {"Dispense"})
-	self.Outputs = WireLib.CreateOutputs(self, {"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Shipment"})
+	self.Inputs = WireLib.CreateInputs(self, {"Dispense", "Price Markup", "Seperate Price Markup", "Currency", "Out Of Stock Message"})
+	WireLib.AdjustSpecialInputs(self,
+		{"Dispense", "Price Markup", "Seperate Price Markup", "Currency", "Out Of Stock Message"},
+		{"NORMAL", "NORMAL", "NORMAL", "STRING", "STRING"}
+	)
+	self.Outputs = WireLib.CreateOutputs(self, {"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Seperate Price", "Shipment"})
 	WireLib.AdjustSpecialOutputs(self,
-		{"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Shipment"},
-		{"NORMAL", "NORMAL", "NORMAL", "STRING", "STRING", "STRING", "STRING", "NORMAL", "NORMAL", "ENTITY"}
+		{"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Seperate Price", "Shipment"},
+		{"NORMAL", "NORMAL", "NORMAL", "STRING", "STRING", "STRING", "STRING", "NORMAL", "NORMAL", "STRING", "STRING", "ENTITY"}
 	)
 
 	self:Setup(2048)
@@ -63,6 +67,11 @@ end
 
 function ENT:Setup(range)
 	if range then self:SetBeamLength(range) end
+	
+	self.m_PriceMarkup = 0
+	self.m_SeperatePriceMarkup = 0
+	self.m_Currency = "$"
+	self.m_OutOfStockMsg = ""
 	
 	self:ResetOutputs()
 end
@@ -90,24 +99,27 @@ local function GetShipmentItemModel(ent, contents)
 		return "models/Items/item_item_crate.mdl"
 	end
 end
-function ENT:Think()
-	local trace = self:BeamTrace()
 
-	local shipment = trace.Entity
+function ENT:UpdateInputs(shipment, forceUpdate)
 	local contents = IsShipment(shipment) and CustomShipments[shipment:Getcontents() or ""]
 
 	if contents then
 		WireLib.TriggerOutput(self, "Quantity", shipment:Getcount())
 
-		if shipment ~= self.m_ActiveShipment or not IsValid(self.m_ActiveShipment) then
+		if shipment ~= self.m_ActiveShipment or not IsValid(self.m_ActiveShipment) or forceUpdate then
+			local markedUpPrice = contents.price + self.m_PriceMarkup
+			local markedUpSeperatePrice = (contents.pricesep or contents.price / contents.amount) + self.m_SeperatePriceMarkup
+		
 			WireLib.TriggerOutput(self, "Size", contents.amount)
-			WireLib.TriggerOutput(self, "Price", contents.price)
+			WireLib.TriggerOutput(self, "Price", markedUpPrice)
 			WireLib.TriggerOutput(self, "Name", contents.name)
 			WireLib.TriggerOutput(self, "Category", contents.category or "Other")
 			WireLib.TriggerOutput(self, "Type", contents.entity)
 			WireLib.TriggerOutput(self, "Model", GetShipmentItemModel(shipment, contents))
 			WireLib.TriggerOutput(self, "Separate", contents.separate == true and 1 or 0)
-			WireLib.TriggerOutput(self, "Separate Price", contents.pricesep or 0)
+			WireLib.TriggerOutput(self, "Separate Price", markedUpSeperatePrice)
+			WireLib.TriggerOutput(self, "Name And Price", contents.name .. " " .. self.m_Currency .. markedUpPrice)
+			WireLib.TriggerOutput(self, "Name And Seperate Price", contents.name .. " " .. self.m_Currency .. markedUpSeperatePrice)
 			WireLib.TriggerOutput(self, "Shipment", shipment)
 		end
 		
@@ -122,6 +134,12 @@ function ENT:Think()
 	end
 end
 
+function ENT:Think()
+	local trace = self:BeamTrace()
+
+	self:UpdateInputs(trace.Entity)
+end
+
 function ENT:ResetOutputs()
 	WireLib.TriggerOutput(self, "Quantity", 0)
 	WireLib.TriggerOutput(self, "Size", 0)
@@ -131,8 +149,10 @@ function ENT:ResetOutputs()
 	WireLib.TriggerOutput(self, "Type", "")
 	WireLib.TriggerOutput(self, "Model", "")
 	WireLib.TriggerOutput(self, "Separate", 0)
-	WireLib.TriggerOutput(self, "Shipment", NULL)
 	WireLib.TriggerOutput(self, "Separate Price", 0)
+	WireLib.TriggerOutput(self, "Name And Price", self.m_OutOfStockMsg)
+	WireLib.TriggerOutput(self, "Name And Seperate Price", self.m_OutOfStockMsg)
+	WireLib.TriggerOutput(self, "Shipment", NULL)
 end
 
 function ENT:TriggerInput(iName, value)
@@ -146,6 +166,29 @@ function ENT:TriggerInput(iName, value)
 
 		if not hook.Run("PlayerUse", ply, trace.Entity) then return false end
 		trace.Entity:Use(ply, ply, USE_ON, 0)
+	elseif iName == "Price Markup" and value > -1 then
+		self.m_PriceMarkup = value
+		
+		if self.m_ActiveShipment then
+			self:UpdateInputs(self.m_ActiveShipment, true)
+		end
+	elseif iName == "Seperate Price Markup" and value > -1 then
+		self.m_SeperatePriceMarkup = value
+		
+		if self.m_ActiveShipment then
+			self:UpdateInputs(self.m_ActiveShipment, true)
+		end
+	elseif iName == "Currency" then
+		self.m_Currency = (value != "" and value or "$")
+		if self.m_ActiveShipment then
+			self:UpdateInputs(self.m_ActiveShipment, true)
+		end
+	elseif iName == "Out Of Stock Message" then
+		self.m_OutOfStockMsg = (value != "" and value or "")
+		
+		if not self.m_ActiveShipment then
+			self:ResetOutputs()
+		end
 	end
 end
 
