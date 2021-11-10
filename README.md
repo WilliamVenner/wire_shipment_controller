@@ -17,24 +17,30 @@ The Wiremod Shipment Controller is a simple [Wiremod](https://wiremod.com/) comp
 
 ## Inputs
 
-| **Input** | **Type**      | **Description**                                  |
-|-----------|---------------|--------------------------------------------------|
-| Dispense  | Boolean `1/0` | Dispenses 1 item from the shipment               |
-
+| **Input**             | **Type**      | **Description**                                    |
+|-----------------------|---------------|----------------------------------------------------|
+| Dispense              | Boolean `1/0` | Dispenses 1 item from the shipment                 |
+| Price Markup          | Number        | Adds extra money to the price output               |
+| Separate Price Markup | Number        | Adds extra money to the separate price output      |
+| Currency              | String        | Sets the currency symbol                           |
+| Out Of Stock Message  | String        | The message to output when no shipment is detected |
+ 
 ## Outputs
 
-| **Output**     | **Type**      | **Description**                              |
-|----------------|---------------|----------------------------------------------|
-| Quantity       | Number        | Amount of items left in the shipment         |
-| Size           | Number        | Amount of items the shipment originally held |
-| Price          | Number        | Price of shipment                            |
-| Name           | String        | Name of shipment                             |
-| Category       | String        | Category of shipment in F4 menu              |
-| Type           | String        | Class name of shipment item entity           |
-| Model          | String        | Model path of item                           |
-| Separate       | Boolean `1/0` | Whether the shipment is also sold separately |
-| Separate Price | Number        | Price of item when sold separately           |
-| Shipment       | Entity        | The shipment itself                          |
+| **Output**              | **Type**      | **Description**                                                                                      |
+|-------------------------|---------------|------------------------------------------------------------------------------------------------------|
+| Quantity                | Number        | Amount of items left in the shipment                                                                 |
+| Size                    | Number        | Amount of items the shipment originally held                                                         |
+| Price                   | Number        | Price of shipment                                                                                    |
+| Name                    | String        | Name of shipment                                                                                     |
+| Category                | String        | Category of shipment in F4 menu                                                                      |
+| Type                    | String        | Class name of shipment item entity                                                                   |
+| Model                   | String        | Model path of item                                                                                   |
+| Separate                | Boolean `1/0` | Whether the shipment is also sold separately                                                         |
+| Separate Price          | Number        | Price of item when sold separately, if not separate the output will default to price / size          |
+| Name And Price          | String        | Combination of name and price                                                                        |
+| Name And Separate Price | String        | Combination of name and separate price                                                               |
+| Shipment                | Entity        | The shipment itself                                                                                  |
 
 ## Technical Information
 
