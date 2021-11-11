@@ -51,14 +51,14 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	
-	self.Inputs = WireLib.CreateInputs(self, {"Dispense", "Price Markup", "Seperate Price Markup", "Currency", "Out Of Stock Message"})
+	self.Inputs = WireLib.CreateInputs(self, {"Dispense", "Price Markup", "Separate Price Markup", "Currency", "Out Of Stock Message"})
 	WireLib.AdjustSpecialInputs(self,
-		{"Dispense", "Price Markup", "Seperate Price Markup", "Currency", "Out Of Stock Message"},
+		{"Dispense", "Price Markup", "Separate Price Markup", "Currency", "Out Of Stock Message"},
 		{"NORMAL", "NORMAL", "NORMAL", "STRING", "STRING"}
 	)
-	self.Outputs = WireLib.CreateOutputs(self, {"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Seperate Price", "Shipment"})
+	self.Outputs = WireLib.CreateOutputs(self, {"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Separate Price", "Shipment"})
 	WireLib.AdjustSpecialOutputs(self,
-		{"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Seperate Price", "Shipment"},
+		{"Quantity", "Size", "Price", "Name", "Category", "Type", "Model", "Separate", "Separate Price", "Name And Price", "Name And Separate Price", "Shipment"},
 		{"NORMAL", "NORMAL", "NORMAL", "STRING", "STRING", "STRING", "STRING", "NORMAL", "NORMAL", "STRING", "STRING", "ENTITY"}
 	)
 
@@ -69,7 +69,7 @@ function ENT:Setup(range)
 	if range then self:SetBeamLength(range) end
 	
 	self.m_PriceMarkup = 0
-	self.m_SeperatePriceMarkup = 0
+	self.m_SeparatePriceMarkup = 0
 	self.m_Currency = "$"
 	self.m_OutOfStockMsg = ""
 	
@@ -108,7 +108,7 @@ function ENT:UpdateInputs(shipment, forceUpdate)
 
 		if shipment ~= self.m_ActiveShipment or not IsValid(self.m_ActiveShipment) or forceUpdate then
 			local markedUpPrice = contents.price + self.m_PriceMarkup
-			local markedUpSeperatePrice = (contents.pricesep or contents.price / contents.amount) + self.m_SeperatePriceMarkup
+			local markedUpSeparatePrice = (contents.pricesep or contents.price / contents.amount) + self.m_SeparatePriceMarkup
 		
 			WireLib.TriggerOutput(self, "Size", contents.amount)
 			WireLib.TriggerOutput(self, "Price", markedUpPrice)
@@ -117,9 +117,9 @@ function ENT:UpdateInputs(shipment, forceUpdate)
 			WireLib.TriggerOutput(self, "Type", contents.entity)
 			WireLib.TriggerOutput(self, "Model", GetShipmentItemModel(shipment, contents))
 			WireLib.TriggerOutput(self, "Separate", contents.separate == true and 1 or 0)
-			WireLib.TriggerOutput(self, "Separate Price", markedUpSeperatePrice)
+			WireLib.TriggerOutput(self, "Separate Price", markedUpSeparatePrice)
 			WireLib.TriggerOutput(self, "Name And Price", contents.name .. " " .. self.m_Currency .. markedUpPrice)
-			WireLib.TriggerOutput(self, "Name And Seperate Price", contents.name .. " " .. self.m_Currency .. markedUpSeperatePrice)
+			WireLib.TriggerOutput(self, "Name And Separate Price", contents.name .. " " .. self.m_Currency .. markedUpSeparatePrice)
 			WireLib.TriggerOutput(self, "Shipment", shipment)
 		end
 		
@@ -151,7 +151,7 @@ function ENT:ResetOutputs()
 	WireLib.TriggerOutput(self, "Separate", 0)
 	WireLib.TriggerOutput(self, "Separate Price", 0)
 	WireLib.TriggerOutput(self, "Name And Price", self.m_OutOfStockMsg)
-	WireLib.TriggerOutput(self, "Name And Seperate Price", self.m_OutOfStockMsg)
+	WireLib.TriggerOutput(self, "Name And Separate Price", self.m_OutOfStockMsg)
 	WireLib.TriggerOutput(self, "Shipment", NULL)
 end
 
@@ -172,8 +172,8 @@ function ENT:TriggerInput(iName, value)
 		if self.m_ActiveShipment then
 			self:UpdateInputs(self.m_ActiveShipment, true)
 		end
-	elseif iName == "Seperate Price Markup" and value > -1 then
-		self.m_SeperatePriceMarkup = value
+	elseif iName == "Separate Price Markup" and value > -1 then
+		self.m_SeparatePriceMarkup = value
 		
 		if self.m_ActiveShipment then
 			self:UpdateInputs(self.m_ActiveShipment, true)
